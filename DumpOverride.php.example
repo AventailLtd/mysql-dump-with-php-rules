@@ -1,0 +1,22 @@
+<?php
+
+class DumpOverride extends Dump
+{
+    protected function processRow(string $table, array $row): ?array
+    {
+        // replace password/email if table is user for example
+        return $row;
+    }
+
+    protected function listAdditional(string $table): array
+    {
+        // list rows to insert additionally to the dump
+        return [];
+    }
+
+    protected function dumpTable(string $table)
+    {
+        // do something different - see the parent method
+        parent::dumpTable($table);
+    }
+}

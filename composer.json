@@ -1,0 +1,17 @@
+{
+    "config": {
+        "platform": {
+            "php": "7.4.0"
+        }
+    },
+    "require": {
+        "ext-pdo": "*",
+        "ifsnop/mysqldump-php": "2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "include/"
+        },
+        "classmap": ["include/"]
+    }
+}
