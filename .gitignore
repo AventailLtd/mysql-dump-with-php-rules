@@ -1,4 +1,4 @@
-/DumpOverride.php
+/Dump*.php
 /*.sql
 /*.gz
 /vendor

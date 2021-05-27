@@ -91,10 +91,11 @@ class Dump
      */
     private function dumpTableWithFilter(string $table, string $filter)
     {
-        $res = $this->pdo->query("SELECT * FROM " . $table . " WHERE 1 = 1" . $filter);
+        $res = $this->pdo->query("SELECT * FROM `" . $table . "` WHERE 1 = 1" . $filter);
         $sqldump = '-- insert ' . $table . "(filter: \"" . $filter . "\")\n";
         $sqldump .= "/*!40101 SET NAMES utf8mb4 */;\n";
         $cnt = 0;
+        $this->addToDump($sqldump);
 
         // quote hoz kell neki.
         SQLUtils::$db = $this->pdo;
@@ -105,16 +106,15 @@ class Dump
                 continue;
             }
 
-            $sqldump .= SQLUtils::buildInsertSQL($table, $row) . ";\n";
+            $this->addToDump(SQLUtils::buildInsertSQL($table, $row) . ";\n");
             $cnt++;
         }
 
         // néhány további sor, szintetikus adatok
         foreach ($this->listAdditionalRows($table) as $rowAdditional) {
-            $sqldump .= SQLUtils::buildInsertSQL($table, $rowAdditional) . ";\n";
+            $this->addToDump(SQLUtils::buildInsertSQL($table, $rowAdditional) . ";\n");
             $cnt++;
         }
-        $this->addToDump($sqldump);
         $this->debug($cnt . " rows\n");
     }
 

@@ -43,9 +43,9 @@ MYSQL_HOST=localhost MYSQL_USERNAME=dbuser MYSQL_PASSWORD=12345 MYSQL_DB=mysqldb
 
 Note: you need to clone the repo at this point!
 
-docker run --rm -v /mnt/sourcecode:/var/www/html -v /mnt/sourcecode/data:/data -e MYSQL_HOST=localhost -e MYSQL_USERNAME=dbuser -e MYSQL_PASSWORD=12345 -e MYSQL_DB=mysqldb -e DUMP_FILENAME=/data/sql.sql dblaci/nginx-php-dev:7.4-20201222 php /var/www/html/index.php
+docker run --rm -v /mnt/sourcecode:/var/www/html -v /mnt/sourcecode/data:/data -e MYSQL_HOST=localhost -e MYSQL_USERNAME=dbuser -e MYSQL_PASSWORD=12345 -e MYSQL_DB=mysqldb -e DUMP_FILENAME=/data/sql.sql aventailltd/docker-php:7.4-20210521 php /var/www/html/index.php
 
 Dump to stdout:
 
-docker run --rm -v /mnt/sourcecode:/var/www/html -e MYSQL_HOST=localhost -e MYSQL_USERNAME=dbuser -e MYSQL_PASSWORD=12345 -e MYSQL_DB=mysqldb dblaci/nginx-php-dev:7.4-20201222 php /var/www/html/index.php
+docker run --rm -v /mnt/sourcecode:/var/www/html -e OVERRIDE_PHP_FILENAME=DumpOverride.php -e MYSQL_HOST=localhost -e MYSQL_USERNAME=dbuser -e MYSQL_PASSWORD=12345 -e MYSQL_DB=mysqldb aventailltd/docker-php:7.4-20210521 php /var/www/html/index.php
 
