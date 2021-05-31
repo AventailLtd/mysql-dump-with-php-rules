@@ -1,3 +1,4 @@
+/.idea
 /Dump*.php
 /*.sql
 /*.gz

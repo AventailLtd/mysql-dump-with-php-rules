@@ -35,6 +35,9 @@ class Dump
 
     protected function debug(string $msg)
     {
+        if (!in_array('-v', $_SERVER['argv'])) {
+            return;
+        }
         fwrite(STDERR, $msg);
     }
 
@@ -77,7 +80,7 @@ class Dump
      *
      * @param string $table
      */
-    private function dumpTableStructure(string $table)
+    protected function dumpTableStructure(string $table)
     {
         $this->dumpTableWithFilter($table, ' AND "0" = "1"'); // TODO: nem túl elegáns
     }
@@ -87,9 +90,8 @@ class Dump
      *
      * @param string $table
      * @param string $filter
-     * @throws EtalonInstantiationException
      */
-    private function dumpTableWithFilter(string $table, string $filter)
+    protected function dumpTableWithFilter(string $table, string $filter)
     {
         $res = $this->pdo->query("SELECT * FROM `" . $table . "` WHERE 1 = 1" . $filter);
         $sqldump = '-- insert ' . $table . "(filter: \"" . $filter . "\")\n";
@@ -128,16 +130,13 @@ class Dump
     }
 
     /**
-     * @throws ArchiveCorruptedException
-     * @throws ArchiveIOException
-     * @throws ArchiveIllegalCompressionException
-     * @throws FileInfoException
      */
     public function run()
     {
         // table structure without data
         $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB'), getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true]);
-        $dump->start($sqlfilename);
+        //$dump->start($this->sqlFileName);
+        $dump->start();
 
         // összes tábla dump, de némelyiknél okosság kell.
         $res = $this->pdo->query('SHOW TABLES');

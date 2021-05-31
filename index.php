@@ -4,6 +4,20 @@ require('vendor/autoload.php');
 require('Dump.php');
 //require('include/DBLaci/Framework/SQLUtils.php');
 
+// https://stackoverflow.com/questions/9523240/php-cli-in-windows-handling-ctrl-c-commands
+declare(ticks = 1);                                      // Allow posix signal handling
+
+function sd() {
+    die('ctrl-c' . "\n");
+}
+pcntl_signal(SIGINT,"sd");
+
+//file_put_contents('/dev/stderr', 'alma', FILE_APPEND);
+//fwrite(STDERR, 'alma');
+//echo "körte";
+//sleep(10);
+//die();
+
 // required env check:
 $envs = ['MYSQL_HOST', 'MYSQL_DB', 'MYSQL_USERNAME', 'MYSQL_PASSWORD'];
 foreach ($envs as $requiredEnv) {
