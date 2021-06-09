@@ -26,7 +26,7 @@ class SQLUtils
         } else {
             $sql = 'INSERT';
         }
-        $sql .= ' INTO ' . $table;
+        $sql .= ' INTO `' . $table . '`';
         $sqlset = '';
         $first = true;
         foreach ($data as $k => $m) {

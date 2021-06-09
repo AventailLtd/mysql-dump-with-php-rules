@@ -8,7 +8,7 @@ class DumpOverride extends Dump
         return $row;
     }
 
-    protected function listAdditional(string $table): array
+    protected function listAdditionalRows(string $table): array
     {
         // list rows to insert additionally to the dump
         return [];

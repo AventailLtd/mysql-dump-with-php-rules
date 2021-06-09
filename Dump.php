@@ -8,6 +8,7 @@ class Dump
     public array $tables = [];
     private string $sqlFileName;
     private PDO $pdo;
+    private \Faker\Generator $faker;
 
     public function __construct(PDO $pdo, string $sqlFilename)
     {
@@ -15,6 +16,22 @@ class Dump
         if (!empty($sqlFilename)) {
             $this->sqlFileName = $sqlFilename;
         }
+    }
+
+    /**
+     * @param string $lang 'hu_HU'
+     * @param int|null $seed set / init seed
+     * @return \Faker\Generator
+     */
+    public function getFaker(string $lang, ?int $seed): \Faker\Generator
+    {
+        if (!isset($this->faker)) {
+            $this->faker = Faker\Factory::create($lang);
+        }
+        if (isset($seed)) {
+            $this->faker->seed($seed);
+        }
+        return $this->faker;
     }
 
     /**
@@ -35,7 +52,7 @@ class Dump
 
     protected function debug(string $msg)
     {
-        if (!in_array('-v', $_SERVER['argv'])) {
+        if (!isset($this->sqlFileName) && !in_array('-v', $_SERVER['argv'])) {
             return;
         }
         fwrite(STDERR, $msg);
@@ -48,6 +65,9 @@ class Dump
      */
     protected function dumpTable(string $table)
     {
+        if (in_array($table, $this->tables)) {
+            $this->tables = array_diff($this->tables, [$table]);
+        }
         if (in_array($table, [
             'skip_this_table',
         ])) {

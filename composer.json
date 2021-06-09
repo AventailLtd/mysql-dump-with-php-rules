@@ -6,7 +6,8 @@
     },
     "require": {
         "ext-pdo": "*",
-        "ifsnop/mysqldump-php": "2.*"
+        "ifsnop/mysqldump-php": "2.*",
+        "fakerphp/faker": "^1.14"
     },
     "autoload": {
         "psr-4": {
