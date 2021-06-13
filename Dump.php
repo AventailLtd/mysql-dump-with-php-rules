@@ -116,6 +116,7 @@ class Dump
         $res = $this->pdo->query("SELECT * FROM `" . $table . "` WHERE 1 = 1" . $filter);
         $sqldump = '-- insert ' . $table . "(filter: \"" . $filter . "\")\n";
         $sqldump .= "/*!40101 SET NAMES utf8mb4 */;\n";
+        $sqldump .= "/*!40000 ALTER TABLE `" . $table . "` DISABLE KEYS */;\n";
         $cnt = 0;
         $this->addToDump($sqldump);
 
@@ -137,6 +138,7 @@ class Dump
             $this->addToDump(SQLUtils::buildInsertSQL($table, $rowAdditional) . ";\n");
             $cnt++;
         }
+        $this->addToDump("/*!40000 ALTER TABLE `" . $table . "` ENABLE KEYS */;\n");
         $this->debug($cnt . " rows\n");
     }
 
@@ -154,7 +156,7 @@ class Dump
     public function run()
     {
         // table structure without data
-        $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB'), getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true]);
+        $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB'), getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true, 'disable-keys' => true]);
         //$dump->start($this->sqlFileName);
         $dump->start();
 
