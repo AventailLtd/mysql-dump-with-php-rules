@@ -1,14 +1,19 @@
 <?php
 
+namespace AventailLtd\Dump;
+
 use DBLaci\Framework\SQLUtils;
+use Faker\Factory;
+use Faker\Generator;
 use Ifsnop\Mysqldump\Mysqldump;
+use PDO;
 
 class Dump
 {
     public array $tables = [];
     private string $sqlFileName;
     private PDO $pdo;
-    private \Faker\Generator $faker;
+    private Generator $faker;
 
     public function __construct(PDO $pdo, string $sqlFilename)
     {
@@ -21,12 +26,12 @@ class Dump
     /**
      * @param string $lang 'hu_HU'
      * @param int|null $seed set / init seed
-     * @return \Faker\Generator
+     * @return Generator
      */
-    public function getFaker(string $lang, ?int $seed): \Faker\Generator
+    public function getFaker(string $lang, ?int $seed): Generator
     {
         if (!isset($this->faker)) {
-            $this->faker = Faker\Factory::create($lang);
+            $this->faker = Factory::create($lang);
         }
         if (isset($seed)) {
             $this->faker->seed($seed);
@@ -142,6 +147,11 @@ class Dump
         $this->debug($cnt . " rows\n");
     }
 
+    /**
+     * add string content (typically sql) to dump
+     *
+     * @param string $dumpString
+     */
     private function addToDump(string $dumpString)
     {
         if (isset($this->sqlFileName)) {
@@ -151,8 +161,6 @@ class Dump
         }
     }
 
-    /**
-     */
     public function run()
     {
         // table structure without data

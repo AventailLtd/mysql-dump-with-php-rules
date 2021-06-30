@@ -1,5 +1,5 @@
 /.idea
-/Dump*.php
+/Dump*.php*
 /*.sql
 /*.gz
 /vendor

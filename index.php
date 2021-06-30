@@ -1,7 +1,6 @@
 <?php
 
 require('vendor/autoload.php');
-require('Dump.php');
 //require('include/DBLaci/Framework/SQLUtils.php');
 
 // https://stackoverflow.com/questions/9523240/php-cli-in-windows-handling-ctrl-c-commands
@@ -42,6 +41,6 @@ if (file_exists($overrideFilename)) {
     require($overrideFilename);
     $dump = new DumpOverride($pdo, getenv('DUMP_FILENAME'));
 } else {
-    $dump = new Dump($pdo, getenv('DUMP_FILENAME'));
+    $dump = new AventailLtd\Dump\Dump($pdo, getenv('DUMP_FILENAME'));
 }
 $dump->run();
