@@ -41,6 +41,9 @@ if (file_exists($overrideFilename)) {
     require($overrideFilename);
     $dump = new DumpOverride($pdo, getenv('DUMP_FILENAME'));
 } else {
+    if ($overrideFilename !== null) {
+        throw new \Exception('Override class php not exists: ' . $overrideFilename);
+    }
     $dump = new AventailLtd\Dump\Dump($pdo, getenv('DUMP_FILENAME'));
 }
 $dump->run();
