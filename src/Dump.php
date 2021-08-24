@@ -26,11 +26,16 @@ class Dump
     /**
      * @param string $lang 'hu_HU'
      * @param int|null $seed set / init seed
+     * @param bool $forceReseed reinitialize seed on already existing faker instance - use this when you explicitly need a seed number
      * @return Generator
      */
-    public function getFaker(string $lang, ?int $seed): Generator
+    public function getFaker(string $lang, ?int $seed, bool $forceReseed = false): Generator
     {
-        if (!isset($this->faker)) {
+        if (isset($this->faker)) {
+            if (!$forceReseed) {
+                return $this->faker;
+            }
+        } else {
             $this->faker = Factory::create($lang);
         }
         if (isset($seed)) {
