@@ -11,7 +11,10 @@ use PDO;
 class Dump
 {
     public array $tables = [];
-    private string $sqlFileName;
+    /**
+     * if empty string, the output is sent to stdout
+     */
+    private string $sqlFileName = '';
     private PDO $pdo;
     private Generator $faker;
 
@@ -69,15 +72,23 @@ class Dump
     }
 
     /**
+     * remove processed table from the queue
+     */
+    protected function removeTableFromQueue(string $table)
+    {
+        if (in_array($table, $this->tables)) {
+            $this->tables = array_diff($this->tables, [$table]);
+        }
+    }
+
+    /**
      * mivel a táblák sorrendje nem mindegy, és nem akarjuk kétszer ugyanazt, ezért ez a fv kitörli a tables tömbből a táblát.
      *
      * @param string $table
      */
     protected function dumpTable(string $table)
     {
-        if (in_array($table, $this->tables)) {
-            $this->tables = array_diff($this->tables, [$table]);
-        }
+        $this->removeTableFromQueue($table);
         if (in_array($table, [
             'skip_this_table',
         ])) {
@@ -169,9 +180,9 @@ class Dump
     public function run()
     {
         // table structure without data
-        $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB'), getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true, 'disable-keys' => true]);
-        //$dump->start($this->sqlFileName);
-        $dump->start();
+        $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB') . ';charset=utf8mb4', getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true, 'disable-keys' => true]);
+        $dump->start($this->sqlFileName);
+        //$dump->start();
 
         // összes tábla dump, de némelyiknél okosság kell.
         $res = $this->pdo->query('SHOW TABLES');
