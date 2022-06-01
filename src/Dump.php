@@ -12,9 +12,9 @@ class Dump
 {
     public array $tables = [];
     /**
-     * if empty string, the output is sent to stdout
+     * if not isset, output is written to stdout
      */
-    private string $sqlFileName = '';
+    private string $sqlFileName;
     private PDO $pdo;
     private Generator $faker;
 
@@ -181,8 +181,7 @@ class Dump
     {
         // table structure without data
         $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB') . ';charset=utf8mb4', getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true, 'disable-keys' => true]);
-        $dump->start($this->sqlFileName);
-        //$dump->start();
+        $dump->start($this->sqlFileName ?? '');
 
         // összes tábla dump, de némelyiknél okosság kell.
         $res = $this->pdo->query('SHOW TABLES');
@@ -203,7 +202,7 @@ class Dump
             passthru($cmd, $ret);
             $output = ob_get_clean();
             if ($ret !== 0) {
-                throw new \Exception('Nem sikerült betömöríteni az sql dumpot: error: ' . $ret . ' command: ' . $cmd . "\n" . 'output: ' . $output);
+                throw new \RuntimeException('Nem sikerült betömöríteni az sql dumpot: error: ' . $ret . ' command: ' . $cmd . "\n" . 'output: ' . $output);
             }
         }
     }
