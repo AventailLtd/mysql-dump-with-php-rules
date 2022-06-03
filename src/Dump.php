@@ -18,6 +18,13 @@ class Dump
     private PDO $pdo;
     private Generator $faker;
 
+    /**
+     * This variable will guarantee that we only add additional rows to the dump once.
+     *
+     * @var array
+     */
+    protected array $completedAdditionalRowsTables = [];
+
     public function __construct(PDO $pdo, string $sqlFilename)
     {
         $this->pdo = $pdo;
@@ -154,11 +161,15 @@ class Dump
             $cnt++;
         }
 
-        // néhány további sor, szintetikus adatok
-        foreach ($this->listAdditionalRows($table) as $rowAdditional) {
-            $this->addToDump(SQLUtils::buildInsertSQL($table, $rowAdditional) . ";\n");
-            $cnt++;
+        if (!in_array($table, $this->completedAdditionalRowsTables, true)) {
+            // néhány további sor, szintetikus adatok
+            foreach ($this->listAdditionalRows($table) as $rowAdditional) {
+                $this->addToDump(SQLUtils::buildInsertSQL($table, $rowAdditional) . ";\n");
+                $cnt++;
+            }
+            $this->completedAdditionalRowsTables[] = $table;
         }
+
         $this->addToDump("/*!40000 ALTER TABLE `" . $table . "` ENABLE KEYS */;\n");
         $this->debug($cnt . " rows\n");
     }
