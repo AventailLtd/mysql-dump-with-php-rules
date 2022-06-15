@@ -171,7 +171,7 @@ class Dump
         }
 
         $this->addToDump("/*!40000 ALTER TABLE `" . $table . "` ENABLE KEYS */;\n");
-        $this->debug($cnt . " rows\n");
+        $this->debug($table . ': ' . $cnt . " rows\n");
     }
 
     /**
