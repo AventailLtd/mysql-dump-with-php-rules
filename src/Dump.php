@@ -6,6 +6,7 @@ use DBLaci\Framework\SQLUtils;
 use Faker\Factory;
 use Faker\Generator;
 use Ifsnop\Mysqldump\Mysqldump;
+use LogicException;
 use PDO;
 
 class Dump
@@ -17,6 +18,13 @@ class Dump
     private string $sqlFileName;
     private PDO $pdo;
     private Generator $faker;
+
+    /**
+     * Fix tables order for dump. (The order of the tables missing from this array is random)
+     *
+     * @var array
+     */
+    protected array $customTableOrder = [];
 
     /**
      * This variable will guarantee that we only add additional rows to the dump once.
@@ -80,6 +88,7 @@ class Dump
 
     /**
      * remove processed table from the queue
+     * @deprecated - This function is no longer used, but has not been deleted for compatibility reasons.
      */
     protected function removeTableFromQueue(string $table)
     {
@@ -89,38 +98,35 @@ class Dump
     }
 
     /**
-     * mivel a táblák sorrendje nem mindegy, és nem akarjuk kétszer ugyanazt, ezért ez a fv kitörli a tables tömbből a táblát.
+     * Dump table, override for specify filters and custom rules.
      *
      * @param string $table
      */
     protected function dumpTable(string $table)
     {
-        $this->removeTableFromQueue($table);
-        if (in_array($table, [
-            'skip_this_table',
-        ])) {
-            // ha egy tábla tartalma kihagyható, akkor átugorjuk
-            $this->debug('DUMP: ' . $table . ' ... SKIPPED' . PHP_EOL);
-            return;
-        }
+        // Example for skipping table.
+        //if (in_array($table, [
+        //    'skip_this_table',
+        //])) {
+        //    $this->debug('DUMP: ' . $table . ' ... SKIPPED' . PHP_EOL);
+        //    return;
+        //}
 
-        if (in_array('dependency1', $this->tables, true) && in_array($table, [
-                'dependency1',
-            ])) {
-            $this->dumpTable('dependency1'); // kvázi függőség
-        }
+        // Example for filtered and structure only tables.
+        //switch ($table) {
+        //    case 'withfilter_table':
+        //        $this->dumpTableWithFilter($table, '`name` = "alma"');
+        //        break;
+        //    case 'structure_only_table':
+        //        $this->dumpTableStructure($table);
+        //        break;
+        //    default:
+        //        $this->dumpTableWithFilter($table, '');
+        //        break;
+        //}
 
-        switch ($table) {
-            case 'withfilter_table':
-                $this->dumpTableWithFilter($table, '`name` = "alma"');
-                break;
-            case 'structure_only_table':
-                $this->dumpTableStructure($table);
-                break;
-            default:
-                $this->dumpTableWithFilter($table, '');
-                break;
-        }
+        // Default filter table without any filter.
+        $this->dumpTableWithFilter($table, '');
     }
 
     /**
@@ -203,7 +209,7 @@ class Dump
 
         $this->addToDump("START TRANSACTION;\nSET autocommit=0;\nSET unique_checks=0;\nSET foreign_key_checks=0;\n");
         while (count($this->tables)) {
-            $this->dumpTable(array_pop($this->tables));
+            $this->dumpTable($this->getNextTable());
         }
         $this->addToDump("COMMIT;\n");
         if (isset($this->sqlFileName)) {
@@ -216,5 +222,28 @@ class Dump
                 throw new \RuntimeException('Nem sikerült betömöríteni az sql dumpot: error: ' . $ret . ' command: ' . $cmd . "\n" . 'output: ' . $output);
             }
         }
+    }
+
+    /**
+     * Return next table for dump and remove it from queue.
+     *
+     * @return string
+     */
+    public function getNextTable(): string
+    {
+        if (count($this->customTableOrder) > 0) {
+            $tableInOrder = array_shift($this->customTableOrder);
+
+            foreach ($this->tables as $key => $table) {
+                if ($table === $tableInOrder) {
+                    unset($this->tables[$key]);
+                    return $table;
+                }
+            }
+
+            throw new LogicException('Ordered table not found: ' . $tableInOrder);
+        }
+
+        return array_shift($this->tables);
     }
 }
