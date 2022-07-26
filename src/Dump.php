@@ -147,7 +147,6 @@ class Dump
      */
     protected function dumpTableWithFilter(string $table, string $filter)
     {
-        $res = $this->pdo->query("SELECT * FROM `" . $table . "` WHERE 1 = 1" . $filter);
         $sqldump = '-- insert ' . $table . "(filter: \"" . $filter . "\")\n";
         $sqldump .= "/*!40101 SET NAMES utf8mb4 */;\n";
         $sqldump .= "/*!40000 ALTER TABLE `" . $table . "` DISABLE KEYS */;\n";
@@ -157,6 +156,7 @@ class Dump
         // quote hoz kell neki.
         SQLUtils::$db = $this->pdo;
 
+        $res = $this->pdo->query("SELECT * FROM `" . $table . "` WHERE 1 = 1" . $filter);
         while ($row = $res->fetch()) {
             $row = $this->processRow($table, $row);
             if ($row === null) {
