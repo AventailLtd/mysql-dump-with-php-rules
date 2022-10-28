@@ -196,7 +196,7 @@ class Dump
 
     public function run()
     {
-        // table structure without data
+        // table structure without data (including view structures)
         $dump = new Mysqldump('mysql:host=' . getenv('MYSQL_HOST') . ';port=' . (getenv('MYSQL_PORT') ?: '3306') . ';dbname=' . getenv('MYSQL_DB') . ';charset=utf8mb4', getenv('MYSQL_USERNAME'), getenv('MYSQL_PASSWORD'), ['no-data' => true, 'disable-keys' => true]);
         $dump->start($this->sqlFileName ?? '');
 
@@ -212,6 +212,11 @@ class Dump
             $this->dumpTable($this->getNextTable());
         }
         $this->addToDump("COMMIT;\n");
+
+        if (isset($this->sqlFileName)) {
+            $this->postProcessDump($this->sqlFileName);
+        }
+
         if (isset($this->sqlFileName)) {
             $cmd = 'gzip -f ' . $this->sqlFileName;
             ob_start();
@@ -222,6 +227,16 @@ class Dump
                 throw new \RuntimeException('Nem sikerült betömöríteni az sql dumpot: error: ' . $ret . ' command: ' . $cmd . "\n" . 'output: ' . $output);
             }
         }
+    }
+
+    /**
+     * replace content or do anything with the already written dump sql
+     *
+     * @string $sqlFilename
+     * @return void
+     */
+    public function postProcessDump(string $sqlFilename): void
+    {
     }
 
     /**
