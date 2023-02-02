@@ -17,7 +17,7 @@
     "license": "MIT",
     "require": {
         "ext-pdo": "*",
-        "ifsnop/mysqldump-php": "2.*",
+        "ifsnop/mysqldump-php": "dev-PHP_8.2",
         "fakerphp/faker": "^1.14"
     },
     "autoload": {
@@ -26,5 +26,11 @@
             "": "include/"
         },
         "classmap": ["include/"]
-    }
+    },
+    "repositories": [
+      {
+        "type": "vcs",
+        "url": "https://github.com/CallMeJon90/mysqldump-php"
+      }
+    ]
 }
