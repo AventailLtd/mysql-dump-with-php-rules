@@ -170,6 +170,11 @@ class Dump
         if (!in_array($table, $this->completedAdditionalRowsTables, true)) {
             // néhány további sor, szintetikus adatok
             foreach ($this->listAdditionalRows($table) as $rowAdditional) {
+                $rowAdditional = $this->processRow($table, $rowAdditional);
+                if ($rowAdditional === null) {
+                    continue;
+                }
+
                 $this->addToDump(SQLUtils::buildInsertSQL($table, $rowAdditional) . ";\n");
                 $cnt++;
             }
