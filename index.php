@@ -9,7 +9,7 @@ declare(ticks = 1);                                      // Allow posix signal h
 function sd() {
     die('ctrl-c' . "\n");
 }
-pcntl_signal(SIGINT,"sd");
+pcntl_signal(SIGINT, 'sd');
 
 //file_put_contents('/dev/stderr', 'alma', FILE_APPEND);
 //fwrite(STDERR, 'alma');
