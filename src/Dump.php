@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace AventailLtd\Dump;
 
 use DBLaci\Framework\SQLUtils;
@@ -11,6 +13,9 @@ use PDO;
 
 class Dump
 {
+    /**
+     * @var string[]
+     */
     public array $tables = [];
     /**
      * if not isset, output is written to stdout
@@ -21,15 +26,16 @@ class Dump
 
     /**
      * Fix tables order for dump. (The order of the tables missing from this array is random)
+     * Prefer use depends() instead
      *
-     * @var array
+     * @var string[]
      */
     protected array $customTableOrder = [];
 
     /**
      * This variable will guarantee that we only add additional rows to the dump once.
      *
-     * @var array
+     * @var string[]
      */
     protected array $completedAdditionalRowsTables = [];
 
@@ -88,13 +94,21 @@ class Dump
 
     /**
      * remove processed table from the queue
-     * @deprecated - This function is no longer used, but has not been deleted for compatibility reasons.
      */
     protected function removeTableFromQueue(string $table)
     {
         if (in_array($table, $this->tables)) {
             $this->tables = array_diff($this->tables, [$table]);
         }
+    }
+
+    protected function depends(string $table): void
+    {
+        if (!in_array($table, $this->tables)) {
+            return;
+        }
+        $this->removeTableFromQueue($table);
+        $this->dumpTable($table);
     }
 
     /**
@@ -232,7 +246,7 @@ class Dump
     /**
      * replace content or do anything with the already written dump sql
      *
-     * @string $sqlFilename
+     * @string string $sqlFilename
      * @return void
      */
     public function postProcessDump(string $sqlFilename): void
@@ -249,16 +263,14 @@ class Dump
         if (count($this->customTableOrder) > 0) {
             $tableInOrder = array_shift($this->customTableOrder);
 
-            foreach ($this->tables as $key => $table) {
-                if ($table === $tableInOrder) {
-                    unset($this->tables[$key]);
-                    return $table;
-                }
+            if (!in_array($tableInOrder, $this->tables, true)) {
+                throw new LogicException('Ordered table not found: ' . $tableInOrder);
             }
-
-            throw new LogicException('Ordered table not found: ' . $tableInOrder);
+            $this->removeTableFromQueue($tableInOrder);
+            return $tableInOrder;
         }
 
+        // no custom order, fallback to fifo
         return array_shift($this->tables);
     }
 }
