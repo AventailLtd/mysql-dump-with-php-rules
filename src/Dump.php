@@ -20,7 +20,7 @@ class Dump
     /**
      * if not isset, output is written to stdout
      */
-    private string $sqlFileName;
+    protected string $sqlFileName;
     private PDO $pdo;
     private Generator $faker;
 
