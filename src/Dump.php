@@ -232,7 +232,7 @@ class Dump
         }
 
         if (isset($this->sqlFileName)) {
-            $cmd = 'gzip -f ' . $this->sqlFileName;
+            $cmd = 'gzip -f -c ' . $this->sqlFileName . ' > ' . $this->getCompressedFileName();
             ob_start();
             $ret = 0;
             passthru($cmd, $ret);
@@ -241,6 +241,14 @@ class Dump
                 throw new \RuntimeException('Nem sikerült betömöríteni az sql dumpot: error: ' . $ret . ' command: ' . $cmd . "\n" . 'output: ' . $output);
             }
         }
+    }
+
+    /**
+     * @return string
+     */
+    protected function getCompressedFileName(): string
+    {
+        return $this->sqlFileName . '.gz';
     }
 
     /**
