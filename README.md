@@ -43,7 +43,7 @@ MYSQL_HOST=localhost MYSQL_USERNAME=dbuser MYSQL_PASSWORD=12345 MYSQL_DB=mysqldb
 
 Note: you need to clone the repo at this point!
 
-docker run --rm -v /mnt/sourcecode:/var/www/html -v /mnt/sourcecode/data:/data -e MYSQL_HOST=localhost -e MYSQL_USERNAME=dbuser -e MYSQL_PASSWORD=12345 -e MYSQL_DB=mysqldb -e DUMP_FILENAME=/data/sql.sql aventailltd/docker-php:7.4-20210531 php /var/www/html/index.php
+docker run --rm -v /mnt/sourcecode:/var/www/html -v /mnt/sourcecode/data:/data -e MYSQL_HOST=localhost -e MYSQL_USERNAME=dbuser -e MYSQL_PASSWORD=12345 -e MYSQL_DB=mysqldb -e DUMP_FILENAME=/data/sql.sql aventailltd/docker-php:8.2.16-20240311 php /var/www/html/index.php
 
 Dump to stdout:
 
@@ -51,6 +51,9 @@ docker run --rm -v /mnt/sourcecode:/var/www/html -e OVERRIDE_PHP_FILENAME=DumpOv
 
 **Note:** -v option enables debug info, but stdout and stderr split is not working ATM, so only working with file mode.
 
+# shell
+docker run --rm -v ./:/var/www/html -u 1000 -it aventailltd/docker-php:8.2.16-20240311 bash
+
 # Install composer vendor folder
 
-docker run --rm -v /mnt/sourcecode:/var/www/html -u 1000 aventailltd/docker-php:7.4-20210531 composer install
+docker run --rm -v /mnt/sourcecode:/var/www/html -u 1000 aventailltd/docker-php:8.2.16-20240311 composer install
