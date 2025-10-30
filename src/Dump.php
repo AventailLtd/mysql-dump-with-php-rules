@@ -229,7 +229,7 @@ class Dump
         }
 
         $this->addToDump("START TRANSACTION;\nSET autocommit=0;\nSET unique_checks=0;\nSET foreign_key_checks=0;\n");
-        while (count($this->tables)) {
+        while (count($this->tables) !== 0) {
             $this->dumpTable($this->getNextTable());
         }
         $this->addToDump("COMMIT;\n");
