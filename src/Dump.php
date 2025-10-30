@@ -26,14 +26,16 @@ class Dump
 
     /**
      * Fix tables order for dump. (The order of the tables missing from this array is random)
-     * Prefer use depends() instead
      *
+     * @deprecated Prefer use depends() instead
      * @var string[]
      */
     protected array $customTableOrder = [];
 
     /**
      * This variable will guarantee that we only add additional rows to the dump once.
+     * This is needed because the dumpTableWithFilter can be called multiple times (with different filters) but additional rows
+     * should be added only once.
      *
      * @var string[]
      */
@@ -69,7 +71,7 @@ class Dump
     }
 
     /**
-     * override if you want rules. return null for ignore this row
+     * override if you want rules (change content, anonymize or anything). return null to skip this row
      */
     protected function processRow(string $table, array $row): ?array
     {
@@ -77,7 +79,7 @@ class Dump
     }
 
     /**
-     * override if you want rules.
+     * override if you want to add additional data to the table dump
      */
     protected function listAdditionalRows(string $table): array
     {
@@ -105,6 +107,7 @@ class Dump
     protected function depends(string $table): void
     {
         if (!in_array($table, $this->tables)) {
+            // dumped already
             return;
         }
         $this->removeTableFromQueue($table);
@@ -150,7 +153,8 @@ class Dump
      */
     protected function dumpTableStructure(string $table)
     {
-        $this->dumpTableWithFilter($table, ' AND "0" = "1"'); // TODO: nem túl elegáns
+        // semmilyen adatot nem dumpolunk, viszont az additional, vagy más custom hook miatt mégis kell a dumpTable hívás.
+        $this->dumpTableWithFilter($table, ' AND 0 = 1');
     }
 
     /**
@@ -163,22 +167,25 @@ class Dump
     {
         $sqldump = '-- insert ' . $table . "(filter: \"" . $filter . "\")\n";
         $sqldump .= "/*!40101 SET NAMES utf8mb4 */;\n";
-        $sqldump .= "/*!40000 ALTER TABLE `" . $table . "` DISABLE KEYS */;\n";
+        $sqldump .= "/*!40000 ALTER TABLE `" . $table . "` DISABLE KEYS */;\n"; // Note: only myisam tables, innodb ignores this.
         $cnt = 0;
         $this->addToDump($sqldump);
 
         // quote hoz kell neki.
         SQLUtils::$db = $this->pdo;
 
-        $res = $this->pdo->query("SELECT * FROM `" . $table . "` WHERE 1 = 1" . $filter);
-        while ($row = $res->fetch()) {
-            $row = $this->processRow($table, $row);
-            if ($row === null) {
-                continue;
-            }
+        if ($filter !== ' AND 0 = 1') {
+            // meg sem hívjuk a selectet, ha az adat biztos, hogy nem érdekel minket.
+            $res = $this->pdo->query('SELECT * FROM `' . $table . '` WHERE 1 = 1' . $filter);
+            while ($row = $res->fetch()) {
+                $row = $this->processRow($table, $row);
+                if ($row === null) {
+                    continue;
+                }
 
-            $this->addToDump(SQLUtils::buildInsertSQL($table, $row) . ";\n");
-            $cnt++;
+                $this->addToDump(SQLUtils::buildInsertSQL($table, $row) . ";\n");
+                $cnt++;
+            }
         }
 
         if (!in_array($table, $this->completedAdditionalRowsTables, true)) {
@@ -190,7 +197,7 @@ class Dump
             $this->completedAdditionalRowsTables[] = $table;
         }
 
-        $this->addToDump("/*!40000 ALTER TABLE `" . $table . "` ENABLE KEYS */;\n");
+        $this->addToDump('/*!40000 ALTER TABLE `' . $table . '` ENABLE KEYS */;' . "\n");
         $this->debug($table . ': ' . $cnt . " rows\n");
     }
 
@@ -270,7 +277,7 @@ class Dump
             return $tableInOrder;
         }
 
-        // no custom order, fallback to fifo
+        // no custom order, fallback to fifo (Note: depends will still change the order when needed)
         return array_shift($this->tables);
     }
 }
